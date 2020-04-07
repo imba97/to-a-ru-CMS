@@ -16,7 +16,7 @@ class CreateTypesTable extends Migration
         Schema::create('types', function (Blueprint $table) {
             $table->increments('id')->comment('文章类型ID');
             $table->string('tag')->comment('类型标签');
-            $table->string('t_desc')->comment('type desc，类型介绍');
+            $table->string('t_desc')->nullable()->comment('type desc，类型介绍');
             $table->timestamps();
         });
     }

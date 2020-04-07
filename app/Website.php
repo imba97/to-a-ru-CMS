@@ -18,7 +18,7 @@ class Website extends Model
      */
     static public function getDefaultAuthorByWsid ($wsid) {
         $d_author = self::where('id', $wsid)->value('d_author');
-        return !empty($d_author) ? $d_author : '布鲁潘达';
+        return !empty($d_author) ? $d_author : '未知';
     }
 
     /**

@@ -14,7 +14,7 @@
 Route::get('/', ['uses' => 'Home\IndexController@index']);
 
 Route::resource('/article', 'Home\ArticleController');
-Route::resource('/site', 'Home\WebSiteController');
+Route::resource('/website', 'Home\WebSiteController');
 
 Route::get('/user', ['uses' => 'Home\UserController@index']);
 

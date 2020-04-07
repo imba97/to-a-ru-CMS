@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>首页</title>
+    <style>
+        .tab_con ul li a,
+        .tab_con ul li i {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2 style="width: 474px;display:block;margin-left: 200px;">
+        <repeater id="TT">
+            <a style="cursor: pointer;font-size: 18px;color: #f83e40;" href="articles/{id}.html">
+                {title}
+            </a>
+        </repeater>
+    </h2>
+
+    <div class="tab_con">
+        <ul id="card_con_1" class="card_con">
+            <repeater id="ZX" max="5">
+                <li>【{type}】<a style="cursor: pointer" href="articles/{id}.html" target="_blank">{title}</a><i>{updated_at}</i></li>
+            </repeater>
+        </ul>
+
+        <ul id="card_con_2" class="card_con">
+            <repeater id="XW" max="5">
+                <li>【{type}】<a style="cursor: pointer" href="articles/{id}.html" target="_blank">{title}</a><i>{updated_at}</i></li>
+            </repeater>
+        </ul>
+        <ul id="card_con_3" class="card_con">
+            <repeater id="HD" max="5">
+                <li>【{type}】<a style="cursor: pointer" href="articles/{id}.html" target="_blank">{title}</a><i>{updated_at}</i></li>
+            </repeater>
+        </ul>
+
+        <ul id="card_con_4" class="card_con">
+            <repeater id="GL" max="5">
+                <li>【{type}】<a style="cursor: pointer" href="articles/{id}.html" target="_blank">{title}</a><i>{updated_at}</i></li>
+            </repeater>
+        </ul>
+    </div>
+    <h2><a href="./list/ZX-1.html">进入列表页</a></h2>
+</body>
+</html>

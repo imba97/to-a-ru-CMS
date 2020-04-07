@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>文章页</title>
+    <style>
+        .main {
+            margin: 50px auto;
+            width: 600px;
+            min-height: 300px;
+            border: 2px #000 solid;
+            background-color: #FFE69F;
+        }
+
+        .newh {
+            color: #483b3b;
+            line-height:45px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <repeater id="article">
+            <div class="newh"><h2>{title}</h2></div>
+            <div class="newc">
+                <div style="padding:30px">
+                    {content}
+                    <p style="text-align:right;">{created_at}</p>
+                </div>
+            </div>
+        </repeater>
+    </div>
+</body>
+</html>

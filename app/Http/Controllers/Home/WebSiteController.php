@@ -59,6 +59,33 @@ class WebSiteController extends Controller
         return response()->json($result);
     }
 
+    public function update(Request $request, $id) {
+
+        $data = $request->input('WebSite');
+
+        $webSite = Website::find($id);
+        $webSite->gamename = $data['gamename'];
+        $webSite->d_author = $data['d_author'];
+        $webSite->m_tag = $data['m_tag'];
+        $webSite->copyfile = $data['copyfile'];
+        $webSite->updated_at = date('Y-m-d H:i:s', time());
+
+        $result = array(
+            'status'    => 0,
+            'info'  => '修改失败'
+        );
+
+        if($webSite->save()) {
+            $result['status'] = 1;
+            $result['data'] = array(
+                'id' => $webSite->id
+            );
+            $result['info'] = '修改成功';
+        }
+
+        return response()->json($result);
+    }
+
     public function show($id) {
         $webSite = WebSite::find($id);
         if(!$webSite) {
@@ -66,6 +93,17 @@ class WebSiteController extends Controller
         }
         return view('Home.WebSite.show', [
             'webSite'   =>  $webSite
+        ]);
+    }
+
+    public function edit($id) {
+        $webSite = WebSite::find($id);
+        if(!$webSite) {
+            return redirect('/site')->with('message', '该站点不存在');
+        }
+        return view('Home.WebSite.edit', [
+            'webSite'   =>  $webSite,
+            'edittype'  =>  'edit'
         ]);
     }
 

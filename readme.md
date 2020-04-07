@@ -6,6 +6,8 @@
 
 - [x] 文章的增删改
 - [x] 根据模板生成首页、文章列表、文章页
+- [x] 自定义配置
+- [x] 复制文件配置
 - [ ] 根据多个文章ID生成对应文章
 - [ ] 文章类型的增删改
 - [ ] 网站增删改查
@@ -28,3 +30,17 @@
 # 开发框架
 
 <p align="center"><img src="https://laravel.com/assets/img/components/logo-laravel.svg"></p>
+
+# 更新日志
+
+ - 2020-01-20
+
+   为laravel-u-editor增加FTP上传，但作者还没处理合并请求，如果需要FTP上传你得单独在这里下载：[laravel-u-editor](https://github.com/imba97/laravel-u-editor)
+
+ - 2020-04-07
+ 
+   优化复制文件，现在可以自动创建目录结构
+   
+   增加网站编辑功能
+   
+   list页面的分页样式改成可定制的了

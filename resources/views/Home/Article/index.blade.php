@@ -68,25 +68,24 @@
                 url: '{{ url('/api/article/changeArticleStatus') }}',
                 data: data,
                 success: function(json) {
-                    if(json) {
-                        if(json.status === 1) {
-                            if(json.data.type === 'status') {
-                                $('tr[data-id=' + json.data.id + ']')
-                                    .removeClass('active success warning danger')
-                                    .addClass(json.data.statusClass)
-                                    .find('.status-btn').text(json.data.statusText).removeAttr('data-getting')
-                            } else if(json.data.type === 'istop') {
-                                $('tr[data-id=' + json.data.id + ']').find('.istop-btn')
-                                    .removeClass('active success warning danger')
-                                    .addClass(json.data.statusClass)
-                                    .text(json.data.statusText)
-                                    .removeAttr('data-getting')
-                            }
-
-                        } else {
-                            $('#alertMessage').modal('123');
-                        }
+                    if(!json || json.status !== 1) {
+                        $('#alertMessage').modal();
+                        return false;
                     }
+
+                    if(json.data.type === 'status') {
+                        $('tr[data-id=' + json.data.id + ']')
+                            .removeClass('active success warning danger')
+                            .addClass(json.data.statusClass)
+                            .find('.status-btn').text(json.data.statusText).removeAttr('data-getting')
+                    } else if(json.data.type === 'istop') {
+                        $('tr[data-id=' + json.data.id + ']').find('.istop-btn')
+                            .removeClass('active success warning danger')
+                            .addClass(json.data.statusClass)
+                            .text(json.data.statusText)
+                            .removeAttr('data-getting')
+                    }
+
                 },
                 error: function() {
                     alert('修改失败');
@@ -112,7 +111,7 @@
                 data: data,
                 success: function(json) {
                     if(!json || json.status !== 1) {
-                        $('#alertMessage').modal('123');
+                        $('#alertMessage').modal();
                         return;
                     }
 

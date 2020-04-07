@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html>
+﻿<html lang="zh-CN">
+﻿<head>
+﻿    <meta charset="UTF-8">
+﻿    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+﻿    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+﻿    <title>列表页</title>
+    <style>
+        .tab_con {
+            height: 250px;
+        }
+        .tab {
+            height: 50px;
+        }
+        .tab::after {
+            clear: both;
+        }
+        .tab li {
+            list-style: none;
+            width: 50px;
+            float: left;
+        }
+        .tab, .tab_con, .pages {
+            margin: 0 auto;
+            width: 600px;
+        }
+
+        .pages a {
+            margin: 0 5px;
+        }
+    </style>
+﻿</head>
+﻿<body>
+    <ul class="tab">
+        <li class="cardTitle"><a href="ZX-1.html">最新</a></li>
+        <li class="cardTitle"><a href="XW-1.html">新闻</a></li>
+        <li class="cardTitle"><a href="HD-1.html">活动</a></li>
+        <li class="cardTitle"><a href="GL-1.html">攻略</a></li>
+    </ul>
+
+    <div class="tab_con">
+        <ul id="card_con_1" class="card_con">
+            <repeater id="list" pageMax="10" tags="ZX,XW,HD,GL">
+                <li>
+
+                    &emsp;
+
+                    <a style="cursor: pointer" href="../articles/{id}.html">
+                        【{type}】{title}
+                    </a>
+
+                    &emsp;
+
+                    <i>{updated_at}</i>
+
+                </li>
+            </repeater>
+        </ul>
+    </div>
+
+    <div class="pages">
+        <repeater id="paginate">
+            <a href='{firstPage}' class='pageOne'>首页</a>
+            <a href='{previousPage}'>上一页</a>
+            <a href='{nextPage}'>下一页</a>
+            <a href='{lastPage}' class='pageOne'>尾页</a>
+            &nbsp; 第 {currentPage} / {pageMax} 页
+        </repeater>
+    </div>
+﻿</body>
+﻿</html>

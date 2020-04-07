@@ -19,7 +19,7 @@ class CreateArticlesTable extends Migration
             $table->text('content')->comment('内容');
             $table->integer('wsid')->comment('从属网站ID');
             $table->integer('istop')->default(0)->comment('是否置顶');
-            $table->string('author')->default('')->comment('作者 空代表网站默认作者');
+            $table->string('author')->nullable()->default('')->comment('作者 空代表网站默认作者');
             $table->integer('status')->default(0)->comment('文章状态');
             $table->integer('type')->comment('文章类型 新闻/活动/等');
             $table->timestamps();

@@ -16,6 +16,9 @@ class BuildController extends Controller
     const SITE_TYPE_PC = 0;
     const SITE_TYPE_MOBILE = 1;
 
+    // 是否有手机版
+    private $isMobileSite;
+
     //
     public $template_path;
     public $dist_path;
@@ -27,6 +30,9 @@ class BuildController extends Controller
     {
         $this->middleware('auth');
         $this->wipeDist = array();
+
+        // 存该网站是否有手机版 $this->isMobileSite[$wsid] = true
+        $this->isMobileSite = array();
 
         $this->template_path = public_path('cms_template');
         $this->dist_path = public_path('cms_dist');
@@ -52,7 +58,7 @@ class BuildController extends Controller
         // 如果有id传参
         if($req_id !== NULL) {
             // 以逗号分隔，如果只有一个值，说明只有一个ID
-            $req_id_arr = explode($req_id);
+            $req_id_arr = explode(',', $req_id);
             foreach($req_id_arr as $req_id_value) {
                 if(empty($req_id_value)) continue;
                 array_push($this->wipeDist, $req_id_value);
@@ -77,10 +83,10 @@ class BuildController extends Controller
         $path = $this->_initDir($wsid);
 
         $buildData = array(
-            'dist_path'  => $path['dist_path'] . '/' . $this->_getTemplateFileName('index'),
-            'tpl_path'  =>  $path['tpl_path'] . '/' . $this->_getDistFileName('index'),
-            'mobile_dist_path'  =>  $path['mobile_dist_path'] . '/' . $this->_getTemplateFileName('index'),
-            'mobile_tpl_path'  =>  $path['mobile_tpl_path'] . '/' . $this->_getDistFileName('index'),
+            'dist_path'  => $path['dist_path'] . '/' . $this->_getDistFileName('index'),
+            'tpl_path'  =>  $path['tpl_path'] . '/' . $this->_getTemplateFileName('index'),
+            'mobile_dist_path'  =>  $path['mobile_dist_path'] . '/' . $this->_getDistFileName('index'),
+            'mobile_tpl_path'  =>  $path['mobile_tpl_path'] . '/' . $this->_getTemplateFileName('index'),
             'wsid'      =>  $wsid
         );
 
@@ -130,6 +136,8 @@ class BuildController extends Controller
 
         $mobileRepeaters = $this->_getRepeatersByTemplatePath($buildData['mobile_tpl_path']);
 
+        if($mobileRepeaters === false) return false;
+
         // 数据库读取的文章信息
         $mobileReplaceData = array();
 
@@ -164,7 +172,7 @@ class BuildController extends Controller
             }
         }
 
-        $this->_build($buildData, $repeaters, $replaceData, self::SITE_TYPE_MOBILE);
+        $this->_build($buildData, $mobileRepeaters, $mobileReplaceData, self::SITE_TYPE_MOBILE);
     }
 
     /**
@@ -202,18 +210,19 @@ class BuildController extends Controller
             for($i = 1; $i <= $pageMax; $i++) {
 
                 // 每次循环重新构造生成文件的名称 格式：tag-page
-                $buildData['dist_path'] = $distFilePath . $this->_getTemplateFileName($articleTypeTag. '-' . $i);
+                $buildData['dist_path'] = $distFilePath . $this->_getDistFileName($articleTypeTag. '-' . $i);
                 // 替换数据，选取 $i 页开始 最多 $listPageMax 条数据
                 $replaceData = array('list' => array_slice($articles,($i - 1) * $listPageMax, $listPageMax));
 
                 // 分页构造
                 $nonePage = 'javascript:void(0);';
-                $firstPage = $i != 1 ? $this->_getTemplateFileName($articleTypeTag . '-1') : $nonePage;
-                $previousPage = ($i - 1) !== 0 ? $this->_getTemplateFileName($articleTypeTag. '-' . ($i - 1)) : $nonePage;
-                $nextPage = ($i + 1) <= $pageMax ? $this->_getTemplateFileName($articleTypeTag. '-' . ($i + 1)) : $nonePage;
-                $lastPage = $i != $pageMax ? $this->_getTemplateFileName($articleTypeTag. '-' . $pageMax) : $nonePage;
+                $firstPage = $i != 1 ? $this->_getDistFileName($articleTypeTag . '-1') : $nonePage;
+                $previousPage = ($i - 1) !== 0 ? $this->_getDistFileName($articleTypeTag. '-' . ($i - 1)) : $nonePage;
+                $nextPage = ($i + 1) <= $pageMax ? $this->_getDistFileName($articleTypeTag. '-' . ($i + 1)) : $nonePage;
+                $lastPage = $i != $pageMax ? $this->_getDistFileName($articleTypeTag. '-' . $pageMax) : $nonePage;
 
                 // 页数大于一，生成分页按钮
+                /*
                 $replaceData['paginate'] = $pageMax === 1 ? '' : "
                     <a href='$firstPage' class='pageOne'>首页</a>
                     <a href='$previousPage'>上一页</a>
@@ -221,6 +230,16 @@ class BuildController extends Controller
                     <a href='$lastPage' class='pageOne'>尾页</a>
                     &nbsp; 第 $i / $pageMax 页
                 ";
+                */
+
+                $replaceData['paginate'] = $pageMax === 1 ? '' : array(
+                    'firstPage'     => $firstPage,
+                    'previousPage'  => $previousPage,
+                    'nextPage'      => $nextPage,
+                    'lastPage'      => $lastPage,
+                    'currentPage'   => $i,
+                    'pageMax'       => $pageMax
+                );
 
                 // biu <(￣︶￣)>
                 $this->_build($buildData, $repeaters, $replaceData, self::SITE_TYPE_PC);
@@ -245,10 +264,10 @@ class BuildController extends Controller
         $path = $this->_initDir($wsid);
 
         $buildData = array(
-            'dist_path'  => $path['dist_path'] . '/articles/' . $this->_getTemplateFileName($articleID),
-            'tpl_path'  =>  $path['tpl_path'] . '/' . $this->_getDistFileName('article'),
-            'mobile_dist_path'  => $path['mobile_dist_path'] . '/articles/' . $this->_getTemplateFileName($articleID),
-            'mobile_tpl_path'  =>  $path['mobile_tpl_path'] . '/' . $this->_getDistFileName('article'),
+            'dist_path'  => $path['articles_path'] . '/' . $this->_getDistFileName($articleID),
+            'tpl_path'  =>  $path['tpl_path'] . '/' . $this->_getTemplateFileName('article'),
+            'mobile_dist_path'  => $path['mobile_articles_path'] . '/' . $this->_getDistFileName($articleID),
+            'mobile_tpl_path'  =>  $path['mobile_tpl_path'] . '/' . $this->_getTemplateFileName('article'),
             'wsid'      =>  $wsid
         );
 
@@ -313,47 +332,37 @@ class BuildController extends Controller
         $content = file_get_contents($tpl_path);
 
         // 第一层循环，循环 页面上的每个 repeater
-        foreach($replaceData as $repeaterTag => $articleContent) {
+        foreach($replaceData as $repeaterTag => $replaceContent) {
 
             // 每次循环清空 $newContent
             $newContent = '';
 
-            // 如果是数组则解析后替换模板中相应的 {XX}
-            if(gettype($articleContent) === 'array') {
+            if($repeaterTag == 'paginate') {
+                $tplContent = $repeaters[$repeaterTag]['html'];
+                $newContent = $this->_replaceContent($newContent, $tplContent, $replaceContent);
+            } else {
+                // 如果是数组则解析后替换模板中相应的 {XX}
+                if(gettype($replaceContent) === 'array') {
 
-                // 第二层循环，循环 repeater 替换内容 repeaterContent
-                foreach($articleContent as $key => $rc) {
+                    // 第二层循环，循环 repeater 替换内容 repeaterContent
+                    foreach($replaceContent as $key => $rc) {
 
-                    // 每次循环让模板内容变为初始未替换过的模板内容
-                    $tplContent = $repeaters[$repeaterTag]['html'];
+                        // 每次循环让模板内容变为初始未替换过的模板内容
+                        $tplContent = $repeaters[$repeaterTag]['html'];
 
-                    // 添加自定义属性
-                    $rc['tagIcon'] = Type::getTagByTypeID($rc['type']);
-                    $rc['created_at_format_m_d'] = timeToFormatTime($rc['created_at'], 'm-d');
-                    $rc['created_at_format_Y_m_d'] = timeToFormatTime($rc['created_at'], 'Y-m-d');
+                        // 添加自定义属性
+                        !isset($rc['type']) ?: $rc['tagIcon'] = Type::getTagByTypeID($rc['type']);
+                        !isset($rc['created_at']) ?: $rc['created_at_format_m_d'] = timeToFormatTime($rc['created_at'], 'm-d');
+                        !isset($rc['created_at']) ?: $rc['created_at_format_Y_m_d'] = timeToFormatTime($rc['created_at'], 'Y-m-d');
 
-                    // 第三层循环，循环 模板页面上 {XX} 对应的替换内容
-                    foreach($rc as $rcKey => $rcValue) {
-
-                        // 重新构造变量值
-                        switch ($rcKey) {
-                            case 'type':
-                                $rcValue = Type::getTypeTDescByTypeID($rcValue);
-                                break;
-                        }
-
-                        // 替换模板变量
-                        $tplKey = '/{' . $rcKey . '}/';
-                        $tplContent = preg_replace($tplKey, $rcValue, $tplContent);
+                        $newContent = $this->_replaceContent($newContent, $tplContent, $rc);
                     }
-                    // 第三层循环结束
-                    $newContent .= $tplContent;
-                }
-                // 第二层循环结束
+                    // 第二层循环结束
 
-            } else if(gettype($articleContent) === 'string') {
-                // 如果是字符串则直接替换
-                $newContent = $articleContent;
+                } else if(gettype($replaceContent) === 'string') {
+                    // 如果是字符串则直接替换
+                    $newContent = $replaceContent;
+                }
             }
 
             $content = preg_replace('/<repeater.*?id="'.$repeaterTag.'".*?>(?:.|\n)*?<\/repeater>/', $newContent, $content);
@@ -365,6 +374,31 @@ class BuildController extends Controller
         fwrite($html_file, $this->compress_html($content));
         fclose($html_file);
         chmod($dist_path, 0777);
+    }
+
+    private function _replaceContent($newContent, $tplContent, $data) {
+
+        if(gettype($data) === 'array') {
+            // 循环 模板页面上 {XX} 对应的替换内容
+            foreach($data as $rcKey => $rcValue) {
+
+                // 重新构造变量值
+                switch ($rcKey) {
+                    case 'type':
+                        $rcValue = Type::getTypeTDescByTypeID($rcValue);
+                        break;
+                }
+
+                // 替换模板变量
+                $tplKey = '/{' . $rcKey . '}/';
+                $tplContent = preg_replace($tplKey, $rcValue, $tplContent);
+            }
+            // 循环结束
+        } else if(gettype($data) === 'string') {
+            return $data;
+        }
+
+        return $newContent . $tplContent;
     }
 
     /**
@@ -415,7 +449,8 @@ class BuildController extends Controller
             'dist_path'     =>  $dist_path,
             'mobile_tpl_path'  =>  $mobile_tpl_path,
             'mobile_dist_path' =>  $mobile_dist_path,
-            'articles_path' =>  $articles_path
+            'articles_path' =>  $articles_path,
+            'mobile_articles_path'  =>  $mobile_articles_path
         );
     }
 
@@ -443,14 +478,28 @@ class BuildController extends Controller
             // 如果没有则跳过
             if(!file_exists($tpl_copyfile)) break;
 
+            $dirName = dirname($dist_copyfile);
+
+            if($dirName !== $path['dist_path']) {
+                if(!is_dir($dist_copyfile)) mkdir($dirName, 0777, true);
+            }
+
             // 复制文件
             copy($tpl_copyfile, $dist_copyfile);
         }
     }
 
     private function _isMobileSite($wsid) {
+
+        if(isset($this->isMobileSite[$wsid])) {
+            return $this->isMobileSite[$wsid];
+        }
+
         $mobileTag = Website::getMobileTagByWsid($wsid);
-        return !empty($mobileTag);
+        $resultData = !empty($mobileTag);
+        $this->isMobileSite[$wsid] = $resultData;
+
+        return !empty($resultData);
     }
 
     /**

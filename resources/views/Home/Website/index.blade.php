@@ -19,7 +19,21 @@
                     <td>{{$website->gamename}}</td>
                     <td>{{$website->d_author}}</td>
                     <td>{{$website->created_at}}</td>
-                    <td>操作</td>
+                    <td>
+                        <div class="btn-group">
+                            <a href="{{ route('website.edit', $website->id) }}" target="_self" class="btn btn-default">编辑</a>
+                            <div class="btn-group">
+                                <a class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                    快速编辑
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="javascript:void(0);">设置1</a></li>
+                                    <li><a href="#">设置2</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
                 </tr>
             @endforeach
         </tbody>

@@ -117,14 +117,13 @@
                 url: '{{ url('/api/build/all') }}',
                 data: {
                     'id': id,
-                    'wsid': 1
+                    'wsid': {{ isset($article->wsid) ? $article->wsid : -1 }}
                 },
                 success: function(json) {
-
+                    if(json)
+                        alert('已自动重新生成文章');
                 }
             });
         }
-
-        // $('#alertMessage').modal();
     </script>
 @stop()

@@ -61,7 +61,7 @@
                         <ul class="nav navbar-nav">
                             <li class="{{ Request::getPathInfo() == '/' ? 'active' : '' }}"><a href="/">首页</a></li>
                             <li class="{{ Request::getPathInfo() == '/article' ? 'active' : '' }}"><a href="{{ url('article') }}">文章</a></li>
-                            <li class="{{ Request::getPathInfo() == '/site' ? 'active' : '' }}"><a href="{{ url('site') }}">站点</a></li>
+                            <li class="{{ Request::getPathInfo() == '/website' ? 'active' : '' }}"><a href="{{ url('website') }}">站点</a></li>
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                     快速生成 <b class="caret"></b>
@@ -122,6 +122,10 @@
 
 $(function(){
 
+    if(window.localStorage.getItem('UserConfig') === null) {
+        window.localStorage.setItem('UserConfig', '{}');
+    }
+
     initConfigHomeNav();
 
     $('#runAll').click(function() {
@@ -151,6 +155,9 @@ $(function(){
         });
     });
 
+    /**
+     * 如果有 alert 就弹出警告信息
+     */
     @if(Session::has('alert'))
         $('#alertMessage').modal();
     @endif
@@ -158,10 +165,43 @@ $(function(){
 
 function initConfigHomeNav() {
 
+    // window.localStorage.setItem('UserConfig', JSON.stringify({webSite: [],saveWebSite: {}}));
+
     var UserConfig = JSON.parse(window.localStorage.getItem('UserConfig'));
 
-    if(UserConfig.webSite.length > 0) {
-        var wsids = UserConfig.webSite.join(',');
+    // 不在 saveWebSiteID 数组中的网站ID
+    var notInSaveWebSiteID = [];
+
+    if(UserConfig.saveWebSite === undefined || UserConfig.saveWebSite.length === 0 || $.isEmptyObject(UserConfig.saveWebSite)) {
+        notInSaveWebSiteID = UserConfig.webSite;
+    }
+
+    // 如果设置了 saveWebSiteID，就转成数组
+    if(UserConfig.webSite !== null && UserConfig.webSite !== undefined && notInSaveWebSiteID.length === 0) {
+
+        var saveWebSite = [];
+
+        // 把储存的网站ID放到 saveWebSite
+        $.each(UserConfig.saveWebSite, function(index, item) {
+            saveWebSite.push(index);
+        });
+
+        $.each(UserConfig.webSite, function(index, item) {
+            if($.inArray(UserConfig.webSite[index], saveWebSite) === -1)
+                notInSaveWebSiteID.push(UserConfig.webSite[index]);
+        });
+    }
+
+    // 如果 notInSaveWebSiteID 里没ID，说明选中的网站里都读取过游戏名
+    if(notInSaveWebSiteID === undefined || notInSaveWebSiteID.length === 0) {
+        createQuickBuildList(UserConfig);
+        return false;
+    }
+
+    // 获取不在 saveWebSiteID 中的网站ID的游戏名
+    if(notInSaveWebSiteID.length > 0) {
+
+        var wsids = notInSaveWebSiteID.join(',');
 
         $.ajax({
             type: 'POST',
@@ -170,20 +210,44 @@ function initConfigHomeNav() {
                 'wsids': wsids
             },
             success: function(json) {
+                var UserConfig = JSON.parse(window.localStorage.getItem('UserConfig'));
 
-                var html = '';
+                if(UserConfig.saveWebSite === undefined || typeof UserConfig.saveWebSite !== 'object') {
+                    UserConfig.saveWebSite = {};
+                }
 
                 for(var index in json) {
-                    html += '<li><a href="javascript:runBuild(' + index + ');">' + json[index] + '</a></li>';
+                    UserConfig.saveWebSite[index] = json[index];
                 }
-                $('#runBtnList').html(html);
+
+                createQuickBuildList(UserConfig);
+
+                if(typeof refreshConfig === 'function') {
+                    refreshConfig(UserConfig);
+                }
             }
         });
     }
+}
 
-    if(UserConfig.webSite !== undefined) {
+/**
+ * 创建“快速生成”按钮下的子按钮
+ * @param UserConfig
+ * @returns {boolean}
+ */
+function createQuickBuildList(UserConfig) {
 
+    if(UserConfig === null
+        || UserConfig.webSite === undefined
+        || UserConfig.saveWebSite === undefined
+    ) return false;
+
+    var html = '';
+    for(var index in UserConfig.webSite) {
+        html += '<li><a href="javascript:runBuild(' + UserConfig.webSite[index] + ');">' + UserConfig.saveWebSite[UserConfig.webSite[index]] + '</a></li>';
     }
+    $('#runBtnList').html(html);
+
 }
 
 function runBuild(wsid) {

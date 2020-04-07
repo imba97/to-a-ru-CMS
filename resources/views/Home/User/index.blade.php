@@ -33,10 +33,6 @@
 // window.localStorage.setItem();
 $(function() {
 
-    var UserConfig = {
-        webSite: [],
-    };
-
     // JSON.parse       string转json
     // JSON.stringify   json转string
 
@@ -47,7 +43,9 @@ $(function() {
     // 设置需要显示的网站
     $('#showWebSite').change(function(){
 
-        // 先清空原有设置
+        var UserConfig = JSON.parse(window.localStorage.getItem('UserConfig'));
+
+        // 清空原有设置
         UserConfig.webSite = [];
 
         // 循环所有选中的网站
@@ -58,6 +56,10 @@ $(function() {
         });
 
         refreshConfig(UserConfig);
+
+        if(typeof initConfigHomeNav === 'function') {
+            initConfigHomeNav();
+        }
     });
 
     // 清空配置
@@ -70,8 +72,8 @@ $(function() {
 
 // 更改配置后执行的刷新配置 localStorage 和 页面 都会更新到最新的配置
 function refreshConfig(UserConfig) {
-    // 是否支持 localStorage
 
+    // 是否支持 localStorage
     if(!window.localStorage) {
         $('#configCode').attr('readonly', 'readonly').val('您的浏览器不支持localStorage');
         return;
